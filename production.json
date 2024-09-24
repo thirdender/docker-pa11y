@@ -2,6 +2,7 @@
   "port": 4000,
   "noindex": true,
   "readonly": false,
+  "siteMessage": null,
 
   "webservice": {
     "database": "mongodb://mongodb/pa11y-webservice",
@@ -11,6 +12,5 @@
     "chromeLaunchConfig": {
        "args": ["--no-sandbox"]
     }
-
   }
 }
