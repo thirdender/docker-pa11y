@@ -1,6 +1,6 @@
 # SMDM pa11y-dashboard Docker Container
 
-FROM node:20-buster-slim
+FROM node:20
 
 LABEL Jakob Osterberger <jo@studiomitte.com>
 
