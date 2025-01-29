@@ -1,13 +1,41 @@
 # pa11y-dashboard
 services:
-  web:
-    build: .
-    ports:
-      - "8000:4000"
-    links:
-      - database:mongodb
-
+  # The Mongo database stores configuration and historical scan data
   database:
     image: mongo:3.2
+
+  # The web service is built using the Dockerfile in this directory
+  web:
+    build: .
+    links:
+      - database:mongodb
+    labels:
+      traefik.enable: true
+      # Route incoming HTTP traffic to port 4000 of this service
+      traefik.http.services.web.loadbalancer.server.port: 4000
+      traefik.http.routers.pa11y.rule: Host(`pa11y.localhost`)
+      # Require authentik middleware on this host
+      traefik.http.routers.pa11y.middlewares: authentik@docker
+    restart: unless-stopped
+
+  # traefik acts as our web proxy to individual Docker services
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "27017"
+      - 8000:80
+      # Uncomment to enable the traefik dashboard at http://localhost:8080
+      # - 8080:8080
+    command:
+      - "--api"
+      # Uncomment to enable the traefik dashboard at http://localhost:8080
+      # - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.web.address=:80"
+
+# Add Authentik IDP
+include:
+  - ./authentik.yml
